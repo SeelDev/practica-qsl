@@ -1,1 +1,1 @@
-# practica-qsl
+# practica-sql
