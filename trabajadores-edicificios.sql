@@ -91,8 +91,57 @@ select COUNT(DISTINCT oficio) as total_oficios from trabajador
 --alta que se paga a un trabajador que informa a ese 
 --supervisor? 
 
-SELECT MAX(t.tarifa)
+SELECT MAX(t.tarifa) as tarifa_max_trabajador,
+	   s.nombre as supervisor
 from trabajador t
+JOIN trabajador s 
+	ON s.legajo = t.legajo_supv
+GROUP BY s.nombre --ordeno por nombre si uso s.nombre
+
+--Para cada tipo de edificio, ¿cuál es el nivel de calidad
+--medio de los edificios con categoría 1? Considérense sólo
+--aquellos tipos de edificios que tienen un nivel de calidad
+--máximo no mayor que 3. 
+
+SELECT e.tipo, AVG(nivel_calidad) as nivel_medio
+from edificio e
+WHERE categoria = 1
+GROUP BY e.tipo
+HAVING MAX(nivel_calidad) < 3
+
+--¿Qué trabajadores reciben una tarifa por hora 
+--menor que la del promedio? 
+
+SELECT nombre 
+FROM trabajador t
+WHERE tarifa < (SELECT AVG(tarifa) from trabajador)
+			-- hago este select pq en el WHERE no se 
+			-- puede usar funciones de agregacion -> AVG
+
+--¿Qué trabajadores reciben una tarifa por hora menor que 
+--la del promedio de los trabajadores que tienen su mismo 
+--oficio? 
+
+SELECT nombre from trabajador t1
+WHERE t1.tarifa < (SELECT AVG(tarifa) from trabajador t2 
+					WHERE t1.oficio = t2.oficio) 
+					
+--Seleccione el nombre de los electricistas asignados al 
+--edificio 435 y la fecha en la que empezaron a trabajar en él. 
+
+SELECT t.nombre, s.id_e, s.fecha_inicio from trabajador t
+JOIN asignacion s 
+	ON t.legajo = s.legajo
+WHERE t.oficio = 'electricista' AND s.id_e = 435
+
+--¿Qué supervisores tienen trabajadores que tienen 
+--una tarifa por hora por encima de los 12 euros? 
+
+SELECT DISTINCT s.nombre as supervisor
+from trabajador t
+JOIN trabajador s 
+	ON t.legajo_supv = s.legajo
+WHERE t.tarifa > 12
 
 
 
